@@ -1,0 +1,760 @@
+<title>Fitting the National Debt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  color-scheme: light;
+  --ground:#f6f7f5;
+  --surface:#fdfdfc;
+  --surface-2:#eef0ec;
+  --ink:#131a18;
+  --ink-2:#4a5754;
+  --ink-3:#77837f;
+  --rule:#dde1dc;
+  --rule-2:#c9cfc9;
+  --accent:#0f6b52;
+  --accent-soft:#e2efe9;
+  --s1:#2a78d6;
+  --s2:#eb6834;
+  --s3:#1baf7a;
+  --s4:#eda100;
+  --s5:#e87ba4;
+  --s7:#4a3aa7;
+  --s8:#e34948;
+  --band:rgba(42,120,214,.14);
+  --shadow:0 1px 2px rgba(19,26,24,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#141816;
+    --surface:#1b201e;
+    --surface-2:#232927;
+    --ink:#f2f5f2;
+    --ink-2:#b6c0bc;
+    --ink-3:#8b9793;
+    --rule:#2e3533;
+    --rule-2:#3d4643;
+    --accent:#4fbf9a;
+    --accent-soft:#1d2f2a;
+    --s1:#3987e5;
+    --s2:#d95926;
+    --s3:#199e70;
+    --s4:#c98500;
+    --s5:#d55181;
+    --s7:#9085e9;
+    --s8:#e66767;
+    --band:rgba(57,135,229,.20);
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#141816;
+  --surface:#1b201e;
+  --surface-2:#232927;
+  --ink:#f2f5f2;
+  --ink-2:#b6c0bc;
+  --ink-3:#8b9793;
+  --rule:#2e3533;
+  --rule-2:#3d4643;
+  --accent:#4fbf9a;
+  --accent-soft:#1d2f2a;
+  --s1:#3987e5;
+  --s2:#d95926;
+  --s3:#199e70;
+  --s4:#c98500;
+  --s5:#d55181;
+  --s7:#9085e9;
+  --s8:#e66767;
+  --band:rgba(57,135,229,.20);
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  font-size:16.5px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:clamp(28px,5vw,64px) clamp(18px,4vw,40px) 96px}
+h1,h2,h3{font-family:"Zilla Slab",Georgia,serif;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.1rem,5vw,3.1rem);font-weight:700;line-height:1.08;letter-spacing:-.015em}
+h2{font-size:clamp(1.35rem,2.6vw,1.75rem);font-weight:600;line-height:1.2}
+h3{font-size:1.05rem;font-weight:600;letter-spacing:.01em}
+p{margin:0}
+a{color:var(--accent)}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
+}
+.lede{font-size:1.12rem;color:var(--ink-2);max-width:64ch}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+header.head{display:flex;flex-direction:column;gap:14px;padding-bottom:26px;border-bottom:2px solid var(--ink)}
+.sourceline{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:.82rem;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+
+section{margin-top:clamp(38px,6vw,64px);display:flex;flex-direction:column;gap:18px}
+.sec-head{display:flex;flex-direction:column;gap:8px}
+.body-copy{display:flex;flex-direction:column;gap:12px;max-width:68ch;color:var(--ink-2)}
+.body-copy strong{color:var(--ink);font-weight:600}
+
+/* stat tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:26px}
+.tile{background:var(--surface);padding:18px 20px;display:flex;flex-direction:column;gap:4px}
+.tile .k{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+.tile .v{font-family:"Zilla Slab",Georgia,serif;font-size:1.9rem;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile .n{font-size:.83rem;color:var(--ink-3);line-height:1.35}
+
+/* verdict */
+.verdict{background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);padding:22px 24px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.formula{
+  font-family:"IBM Plex Mono",monospace;font-size:clamp(.95rem,2.4vw,1.2rem);
+  background:var(--surface-2);border:1px solid var(--rule);padding:14px 16px;overflow-x:auto;white-space:nowrap;
+}
+.formula .hl{color:var(--accent);font-weight:600}
+
+/* charts */
+figure{margin:0;background:var(--surface);border:1px solid var(--rule);box-shadow:var(--shadow)}
+figcaption{padding:16px 20px 0;display:flex;flex-direction:column;gap:5px}
+figcaption .t{font-family:"Zilla Slab",Georgia,serif;font-size:1.08rem;font-weight:600}
+figcaption .d{font-size:.88rem;color:var(--ink-3);max-width:70ch}
+.chart-host{position:relative;padding:10px 14px 14px}
+.chart-host svg{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;padding:0 20px 16px}
+.legend button{
+  display:inline-flex;align-items:center;gap:7px;background:none;border:0;padding:3px 2px;cursor:pointer;
+  font:inherit;font-size:.84rem;color:var(--ink-2);border-bottom:1px solid transparent;
+}
+.legend button:hover{color:var(--ink)}
+.legend button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.legend button[aria-pressed="false"]{opacity:.38;text-decoration:line-through}
+.swatch{width:15px;height:3px;border-radius:2px;flex:none}
+.swatch.dot{width:9px;height:9px;border-radius:50%}
+.tip{
+  position:absolute;pointer-events:none;opacity:0;transition:opacity .1s;
+  background:var(--surface);border:1px solid var(--rule-2);box-shadow:0 4px 14px rgba(0,0,0,.13);
+  padding:9px 11px;font-size:.82rem;min-width:150px;z-index:5;
+}
+.tip .ty{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:.78rem;letter-spacing:.06em;color:var(--ink-3);margin-bottom:5px}
+.tip .tr{display:flex;align-items:center;gap:8px;justify-content:space-between;line-height:1.5}
+.tip .tr .nm{display:flex;align-items:center;gap:6px;color:var(--ink-2)}
+.tip .tr .vl{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;color:var(--ink)}
+
+/* tables */
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:9px 12px;border-bottom:1px solid var(--rule);white-space:nowrap}
+th{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:500;background:var(--surface-2)}
+td:first-child,th:first-child{text-align:left;white-space:normal}
+tbody tr:last-child td{border-bottom:0}
+tr.best td{background:var(--accent-soft)}
+tr.best td:first-child::after{content:"  ★";color:var(--accent)}
+.num{font-family:"IBM Plex Mono",monospace}
+.pill{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:.7rem;padding:1px 7px;border:1px solid var(--rule-2);border-radius:999px;color:var(--ink-2)}
+.pill.good{border-color:var(--accent);color:var(--accent)}
+.pill.bad{border-color:var(--s8);color:var(--s8)}
+
+details{border:1px solid var(--rule);background:var(--surface)}
+summary{padding:12px 16px;cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:.8rem;letter-spacing:.05em;color:var(--ink-2)}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+details[open] summary{border-bottom:1px solid var(--rule)}
+.notes{font-size:.86rem;color:var(--ink-3);display:flex;flex-direction:column;gap:9px;max-width:74ch}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--rule);font-size:.82rem;color:var(--ink-3);display:flex;flex-direction:column;gap:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+<header class="head">
+  <span class="eyebrow">Curve fitting · FY1955 – FY2025 · projections to 2030</span>
+  <h1>Fitting the National Debt</h1>
+  <p class="lede">Ten candidate functional forms fitted to 71 years of gross federal debt, ranked by information criterion and by how well they actually predicted the years they never saw. One family wins, and it is not a polynomial.</p>
+  <div class="sourceline">
+    <span>Source: U.S. Treasury Fiscal Data, Historical Debt Outstanding (fiscal year-end)</span>
+    <span>GDP: FRED GDPA</span>
+  </div>
+</header>
+
+<div class="tiles" id="tiles"></div>
+
+<section>
+  <div class="verdict">
+    <span class="eyebrow">The answer</span>
+    <p style="font-size:1.06rem">Gross federal debt is <strong>exponential in time</strong> — constant proportional growth — not linear, quadratic, or cubic. The best-fitting form is an exponential whose growth rate steps at a small number of policy breakpoints:</p>
+    <div class="formula" id="mainFormula"></div>
+    <p style="color:var(--ink-2);font-size:.95rem">Straight exponential over the whole 71 years gives <span class="mono" id="fullExpG"></span> per year, a doubling time of <span class="mono" id="fullExpT2"></span>. The modern regime is slower than the long-run average: <span class="mono" id="modernG"></span> since 2010, doubling every <span class="mono" id="modernT2"></span>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">01 — The diagnostic</span>
+    <h2>On a log axis, exponential growth is a straight line</h2>
+  </div>
+  <div class="body-copy">
+    <p>This is the single chart that settles the question. Debt is plotted on a logarithmic vertical axis, where equal distances mean equal <em>percentage</em> change. The actual series is close to a straight line for fifty years — the signature of constant compound growth. The level-space polynomials (quadratic, cubic) that look impressive on a linear axis are visibly wrong here: they must go negative or near-zero early in the sample to bend hard enough at the end.</p>
+  </div>
+  <figure>
+    <figcaption>
+      <span class="t">Gross federal debt, FY1955–FY2025, log scale, with fitted models extended to 2030</span>
+      <span class="d">Click a legend entry to show or hide a model. Dashed segments are extrapolation beyond the fitted data.</span>
+    </figcaption>
+    <div class="chart-host" id="c1"></div>
+    <div class="legend" id="c1leg"></div>
+  </figure>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">02 — Ranking</span>
+    <h2>Model comparison</h2>
+  </div>
+  <div class="body-copy">
+    <p>All models are scored on the same footing: residuals in <strong>log space</strong>, which is the statistically honest choice when errors scale with the level (a $200B miss in 1965 is a catastrophe; in 2025 it is a rounding error). <strong>MAPE</strong> is mean absolute percentage error in-sample. <strong>AICc</strong> rewards fit and penalises parameters — lower is better. <strong>Out-of-sample</strong> refits each model on 1955–2010 only and scores its predictions for 2011–2025, which is the test that matters for projection.</p>
+  </div>
+  <div class="tablewrap"><table id="modelTable"></table></div>
+  <div class="notes">
+    <p><strong>Read this carefully:</strong> the flexible models win in-sample and lose out-of-sample. The 3-segment exponential has the best AICc by a wide margin, but when it is fitted blind to 1955–2010 it puts 2025 debt at <span class="mono" id="pw2Oos"></span> against an actual <span class="mono">$37.6T</span>. The plain 2-parameter exponential — worse in-sample — was the most accurate forecaster of the models tested. That is the bias-variance trade-off in one table.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">03 — Where each model breaks</span>
+    <h2>Percentage error over time</h2>
+  </div>
+  <div class="body-copy">
+    <p>Residuals as a percentage of actual debt. A good model's errors look like noise around zero; a mis-specified model's errors are long slow arcs. The polynomials are off the scale for most of the sample — that is why they are clipped here.</p>
+  </div>
+  <figure>
+    <figcaption>
+      <span class="t">Model error, (fitted − actual) ÷ actual</span>
+      <span class="d">Clipped at ±100%. The exponential family stays within roughly ±30% for the whole period; the 3-segment version within ±17%.</span>
+    </figcaption>
+    <div class="chart-host" id="c3"></div>
+    <div class="legend" id="c3leg"></div>
+  </figure>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">04 — Why the breakpoints are real</span>
+    <h2>Three growth regimes, not one</h2>
+  </div>
+  <div class="body-copy">
+    <p>The rolling 10-year compound growth rate makes the regimes visible without any model at all. Debt grew about <strong>2% a year</strong> through the post-war period — slower than the economy, which is why the debt burden shrank until 1974. It then accelerated to a <strong>12–13% peak</strong> spanning the 1970s inflation and the 1980s deficits, and has run near <strong>7–8%</strong> ever since, with the 2008 and 2020 shocks appearing as bumps rather than a permanent change of slope.</p>
+  </div>
+  <figure>
+    <figcaption>
+      <span class="t">Trailing 10-year compound annual growth rate of gross federal debt</span>
+      <span class="d">Horizontal rules mark the three fitted regime rates. Shading marks the breakpoints the model selected (1972 and 1990).</span>
+    </figcaption>
+    <div class="chart-host" id="c4"></div>
+  </figure>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">05 — Projection</span>
+    <h2>Where the curve goes by 2030</h2>
+  </div>
+  <div class="body-copy">
+    <p>The forward model is the log-linear fit to the <strong>post-2008 regime</strong>, the window whose residual spread is small enough to make an interval meaningful (typical error under 5%). The shaded band is a 95% prediction interval from that fit — it is statistical uncertainty in the trend only, and it emphatically does not price in a war, a recession, or a fiscal package.</p>
+  </div>
+  <figure>
+    <figcaption>
+      <span class="t">Actual debt 1990–2025 and projected 2026–2030, linear scale</span>
+      <span class="d">Central path: exponential fitted to 2010–2025. Band: 95% prediction interval. Comparison paths from two other credible fits.</span>
+    </figcaption>
+    <div class="chart-host" id="c2"></div>
+    <div class="legend" id="c2leg"></div>
+  </figure>
+  <div class="tablewrap"><table id="projTable"></table></div>
+  <div class="notes">
+    <p>Every exponential-family fit lands 2030 between roughly <strong>$45T and $60T</strong>, clustering near <strong>$51–54T</strong>. For scale, the same models put debt through <span class="mono">$40T</span> during FY2026 and <span class="mono">$45T</span> around FY2028. A purely linear extension of the last decade's dollar-increments — debt has risen about $2.2T a year since 2022 — gives the low end, near <span class="mono">$45T</span>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">06 — The denominator</span>
+    <h2>Debt against the economy that services it</h2>
+  </div>
+  <div class="body-copy">
+    <p>The dollar total is the wrong unit for almost every question people ask about debt. What matters is debt relative to income. Nominal GDP has itself grown exponentially — about <strong>4.4% a year since 1990</strong> — so the ratio is a race between two exponentials, and it is the <em>difference</em> of the two rates that determines the trajectory. At roughly 7% debt growth against 4.4% GDP growth, the ratio keeps climbing at about 2.5 points of GDP a year.</p>
+  </div>
+  <figure>
+    <figcaption>
+      <span class="t">Gross federal debt as a percentage of nominal GDP</span>
+      <span class="d">FY-end debt over calendar-year GDP. Dashed segment projects both series forward at their fitted exponential rates.</span>
+    </figcaption>
+    <div class="chart-host" id="c5"></div>
+  </figure>
+  <div class="notes">
+    <p>The ratio bottomed at <strong>30.6%</strong> in 1974 and stands at <strong>122.4%</strong> for FY2025 — a fourfold rise in fifty years. Extending both exponentials puts it near <strong>135–145%</strong> by 2030. Note this is <em>gross</em> debt, which includes about $7T the government owes itself (mostly Social Security and Medicare trust funds); debt held by the public is the smaller figure usually quoted in CBO projections.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">07 — Method &amp; caveats</span>
+    <h2>What this analysis can and cannot tell you</h2>
+  </div>
+  <div class="grid2">
+    <div class="notes">
+      <p><strong>Fitting.</strong> Linear-in-parameters models are solved by ordinary least squares via normal equations. Multiplicative models are fitted by OLS on ln(D), which is the maximum-likelihood estimator under proportional errors. Breakpoints, the singularity time t<sub>c</sub>, and the logistic ceiling K are found by exhaustive grid search over the remaining nonlinear parameter, minimising log-space SSE.</p>
+      <p><strong>Scoring.</strong> AICc uses the log-space residual sum of squares with a small-sample correction; k counts every fitted quantity including grid-searched breakpoints, so the flexible models are penalised for the search.</p>
+    </div>
+    <div class="notes">
+      <p><strong>Curve fitting is not economics.</strong> None of these models contains a deficit, an interest rate, or a Congress. They are descriptions of a trajectory, and they hold only while the process that generated it holds. The 1972 and 1990 breakpoints are precisely the evidence that the process does change.</p>
+      <p><strong>The singularity model is a red flag, not a forecast.</strong> A finite-time-blow-up form fits this data well enough to rank mid-table, which is a reminder that within-sample fit cannot distinguish "fast exponential" from "heading for a wall" — the two diverge only outside the data.</p>
+      <p><strong>Interest is the feedback term.</strong> The one mechanism that makes pure exponentiality self-fulfilling is compounding interest on the stock itself, now the fastest-growing line in the federal budget.</p>
+    </div>
+  </div>
+  <details>
+    <summary>Show the underlying data (71 observations)</summary>
+    <div class="tablewrap"><table id="dataTable"></table></div>
+  </details>
+</section>
+
+<footer>
+  <span>Gross federal debt outstanding at fiscal year end (June 30 through FY1976, September 30 from FY1977). All fits computed in-page from the table above.</span>
+  <span>Data: U.S. Treasury Fiscal Data API · Federal Reserve Bank of St. Louis (GDPA). Analysis is descriptive curve fitting, not a fiscal forecast or investment advice.</span>
+</footer>
+</div>
+
+<script>
+/* ============================ DATA ============================ */
+/* [fiscal year, gross debt outstanding $T, calendar-year nominal GDP $T] */
+const RAW=[[1955,0.274374,0.425],[1956,0.272751,0.449],[1957,0.270527,0.474],[1958,0.276343,0.481],[1959,0.284706,0.522],[1960,0.286331,0.542],[1961,0.288971,0.562],[1962,0.298201,0.604],[1963,0.305860,0.637],[1964,0.311713,0.684],[1965,0.317274,0.742],[1966,0.319907,0.813],[1967,0.326221,0.860],[1968,0.347578,0.941],[1969,0.353720,1.020],[1970,0.370919,1.076],[1971,0.398130,1.168],[1972,0.427260,1.283],[1973,0.458142,1.435],[1974,0.475060,1.554],[1975,0.533189,1.691],[1976,0.620433,1.888],[1977,0.698840,2.108],[1978,0.771544,2.382],[1979,0.826519,2.663],[1980,0.907701,2.892],[1981,0.997855,3.241],[1982,1.142034,3.375],[1983,1.377210,3.685],[1984,1.572266,4.114],[1985,1.823103,4.410],[1986,2.125303,4.654],[1987,2.350277,4.943],[1988,2.602338,5.360],[1989,2.857431,5.766],[1990,3.233313,6.062],[1991,3.665303,6.264],[1992,4.064621,6.610],[1993,4.411489,6.995],[1994,4.692750,7.434],[1995,4.973983,7.788],[1996,5.224811,8.256],[1997,5.413146,8.792],[1998,5.526193,9.302],[1999,5.656271,9.878],[2000,5.674178,10.535],[2001,5.807463,10.949],[2002,6.228236,11.322],[2003,6.783231,11.858],[2004,7.379053,12.647],[2005,7.932710,13.520],[2006,8.506974,14.395],[2007,9.007653,15.002],[2008,10.024724,15.335],[2009,11.909829,14.891],[2010,13.561623,15.482],[2011,14.790340,16.021],[2012,16.066242,16.703],[2013,16.738183,17.325],[2014,17.824071,18.087],[2015,18.150618,18.804],[2016,19.573445,19.086],[2017,20.244900,19.612],[2018,21.516058,20.657],[2019,22.719402,21.540],[2020,26.945391,21.375],[2021,28.428919,23.726],[2022,30.928912,26.055],[2023,33.167334,27.812],[2024,35.464674,29.298],[2025,37.637553,30.762]];
+const Y0=1955, END=2030;
+const yr=RAW.map(r=>r[0]), D=RAW.map(r=>r[1]), G=RAW.map(r=>r[2]);
+const t=yr.map(y=>y-Y0), N=D.length, LAST=yr[N-1];
+
+/* ========================== LINEAR ALGEBRA ========================== */
+function solve(A,b){const m=A.length,M=A.map((r,i)=>r.concat([b[i]]));
+  for(let c=0;c<m;c++){let p=c;
+    for(let r=c+1;r<m;r++) if(Math.abs(M[r][c])>Math.abs(M[p][c])) p=r;
+    [M[c],M[p]]=[M[p],M[c]];
+    const pv=M[c][c]; if(Math.abs(pv)<1e-14) return null;
+    for(let r=0;r<m;r++){ if(r===c) continue;
+      const f=M[r][c]/pv; for(let k=c;k<=m;k++) M[r][k]-=f*M[c][k]; }}
+  return M.map((r,i)=>r[m]/r[i]);}
+function ols(X,y){const p=X[0].length,A=[],b=[];
+  for(let i=0;i<p;i++){ b.push(X.reduce((s,x,k)=>s+x[i]*y[k],0)); const row=[];
+    for(let j=0;j<p;j++) row.push(X.reduce((s,x)=>s+x[i]*x[j],0)); A.push(row);}
+  return solve(A,b);}
+const sse=(y,f)=>y.reduce((s,v,i)=>s+(v-f[i])**2,0);
+/* simple regression with prediction standard error */
+function linfit(x,y){const n=x.length,mx=x.reduce((a,b)=>a+b,0)/n,my=y.reduce((a,b)=>a+b,0)/n;
+  let sxy=0,sxx=0; for(let i=0;i<n;i++){sxy+=(x[i]-mx)*(y[i]-my); sxx+=(x[i]-mx)**2;}
+  const b=sxy/sxx,a=my-b*mx;
+  const s2=y.reduce((s,v,i)=>s+(v-(a+b*x[i]))**2,0)/(n-2);
+  return {a,b,s2,rmse:Math.sqrt(s2),se:x0=>Math.sqrt(s2*(1+1/n+(x0-mx)**2/sxx))};}
+
+/* ============================ MODELS ============================ */
+const FIT={
+ 'Linear':(ts,ds)=>{const c=ols(ts.map(x=>[1,x]),ds);
+   return{k:2,f:x=>c[0]+c[1]*x,
+     form:'D = a + b·t',
+     desc:'a = '+c[0].toFixed(3)+', b = '+c[1].toFixed(4)+' $T/yr'};},
+ 'Quadratic':(ts,ds)=>{const c=ols(ts.map(x=>[1,x,x*x]),ds);
+   return{k:3,f:x=>c[0]+c[1]*x+c[2]*x*x,
+     form:'D = a + b·t + c·t²',
+     desc:'c = '+c[2].toFixed(5)+' $T/yr²'};},
+ 'Cubic':(ts,ds)=>{const c=ols(ts.map(x=>[1,x,x*x,x**3]),ds);
+   return{k:4,f:x=>c[0]+c[1]*x+c[2]*x*x+c[3]*x**3,
+     form:'D = a + b·t + c·t² + d·t³',
+     desc:'d = '+c[3].toExponential(2)};},
+ 'Power law':(ts,ds)=>{const c=ols(ts.map(x=>[1,Math.log(x+10)]),ds.map(Math.log));
+   return{k:2,f:x=>Math.exp(c[0]+c[1]*Math.log(x+10)),
+     form:'D = A·(t+10)^m',
+     desc:'m = '+c[1].toFixed(3)};},
+ 'Exponential':(ts,ds)=>{const c=ols(ts.map(x=>[1,x]),ds.map(Math.log));
+   const g=100*(Math.exp(c[1])-1);
+   return{k:2,f:x=>Math.exp(c[0]+c[1]*x), g:g, r:c[1],
+     form:'D = D₀·e^(r·t)',
+     desc:'r = '+g.toFixed(2)+'%/yr, T₂ = '+(Math.LN2/c[1]).toFixed(1)+' yr'};},
+ 'Super-exponential':(ts,ds)=>{const c=ols(ts.map(x=>[1,x,x*x]),ds.map(Math.log));
+   return{k:3,f:x=>Math.exp(c[0]+c[1]*x+c[2]*x*x),
+     form:'ln D = a + b·t + c·t²',
+     desc:'c = '+c[2].toExponential(2)+' (accelerating rate)'};},
+ 'Finite-time singularity':(ts,ds)=>{let best=null;const ly=ds.map(Math.log);
+   for(let tc=Math.max(...ts)+0.25;tc<=400;tc+=0.25){
+     const c=ols(ts.map(x=>[1,Math.log(tc-x)]),ly);
+     const s=sse(ly,ts.map(x=>c[0]+c[1]*Math.log(tc-x)));
+     if(!best||s<best.s) best={s,c,tc};}
+   const{c,tc}=best;
+   return{k:3,f:x=>Math.exp(c[0]+c[1]*Math.log(Math.max(tc-x,0.02))),
+     form:'D = A / (t_c − t)^m',
+     desc:'t_c = '+(Y0+tc).toFixed(0)+', m = '+(-c[1]).toFixed(1)};},
+ 'Logistic':(ts,ds)=>{let best=null;const mx=Math.max(...ds);
+   for(let lk=Math.log(mx*1.01);lk<=Math.log(mx*500);lk+=0.02){const K=Math.exp(lk);
+     const c=ols(ts.map(x=>[1,x]),ds.map(v=>Math.log(K/v-1)));
+     const f=ts.map(x=>K/(1+Math.exp(c[0]+c[1]*x)));
+     const s=sse(ds.map(Math.log),f.map(Math.log));
+     if(!best||s<best.s) best={s,c,K};}
+   const{c,K}=best;
+   return{k:3,f:x=>K/(1+Math.exp(c[0]+c[1]*x)),
+     form:'D = K / (1 + e^(−r(t−t₀)))',
+     desc:'ceiling K = $'+K.toFixed(0)+'T'};},
+ 'Exponential, 1 break':(ts,ds)=>{let best=null;const ly=ds.map(Math.log);
+   for(let b=6;b<=Math.max(...ts)-6;b++){
+     const c=ols(ts.map(x=>[1,x,Math.max(0,x-b)]),ly);
+     const s=sse(ly,ts.map(x=>c[0]+c[1]*x+c[2]*Math.max(0,x-b)));
+     if(!best||s<best.s) best={s,c,b};}
+   const{c,b}=best;
+   return{k:4,f:x=>Math.exp(c[0]+c[1]*x+c[2]*Math.max(0,x-b)),
+     form:'ln D = a + b₁·t + b₂·(t−τ)₊',
+     desc:'τ = '+(Y0+b)+': '+(100*(Math.exp(c[1])-1)).toFixed(2)+'% → '+(100*(Math.exp(c[1]+c[2])-1)).toFixed(2)+'%/yr'};},
+ 'Exponential, 2 breaks':(ts,ds)=>{let best=null;const ly=ds.map(Math.log),mx=Math.max(...ts);
+   for(let b1=6;b1<=mx-12;b1++) for(let b2=b1+6;b2<=mx-6;b2++){
+     const c=ols(ts.map(x=>[1,x,Math.max(0,x-b1),Math.max(0,x-b2)]),ly);
+     const s=sse(ly,ts.map(x=>c[0]+c[1]*x+c[2]*Math.max(0,x-b1)+c[3]*Math.max(0,x-b2)));
+     if(!best||s<best.s) best={s,c,b1,b2};}
+   const{c,b1,b2}=best;
+   const g=[100*(Math.exp(c[1])-1),100*(Math.exp(c[1]+c[2])-1),100*(Math.exp(c[1]+c[2]+c[3])-1)];
+   return{k:6,f:x=>Math.exp(c[0]+c[1]*x+c[2]*Math.max(0,x-b1)+c[3]*Math.max(0,x-b2)),
+     breaks:[Y0+b1,Y0+b2], rates:g,
+     form:'ln D = a + b₁·t + b₂·(t−τ₁)₊ + b₃·(t−τ₂)₊',
+     desc:'τ = '+(Y0+b1)+', '+(Y0+b2)+': '+g[0].toFixed(2)+'% → '+g[1].toFixed(2)+'% → '+g[2].toFixed(2)+'%/yr'};},
+};
+const NAMES=Object.keys(FIT);
+
+function metrics(y,f,k){
+  const n=y.length, ly=y.map(Math.log), lf=f.map(v=>Math.log(Math.max(v,1e-9)));
+  const sL=sse(ly,lf), mL=ly.reduce((a,b)=>a+b,0)/n, my=y.reduce((a,b)=>a+b,0)/n;
+  return{
+    r2log:1-sL/sse(ly,ly.map(()=>mL)),
+    r2lev:1-sse(y,f)/sse(y,y.map(()=>my)),
+    mape:100*y.reduce((s,v,i)=>s+Math.abs(v-f[i])/v,0)/n,
+    aicc:n*Math.log(sL/n)+2*k+2*k*(k+1)/(n-k-1)};}
+
+/* fit everything on the full sample, plus a 1955–2010 holdout refit */
+const M={}, SPLIT=2010, iS=yr.indexOf(SPLIT)+1;
+const tTr=t.slice(0,iS), dTr=D.slice(0,iS), tTe=t.slice(iS), dTe=D.slice(iS);
+for(const nm of NAMES){
+  const m=FIT[nm](t,D), fit=t.map(m.f), me=metrics(D,fit,m.k);
+  const h=FIT[nm](tTr,dTr), hp=tTe.map(h.f);
+  M[nm]={...m,...me,
+    oos:100*dTe.reduce((s,v,i)=>s+Math.abs(v-hp[i])/v,0)/dTe.length,
+    oos2025:hp[hp.length-1],
+    proj:y=>m.f(y-Y0)};
+}
+const RANK=NAMES.slice().sort((a,b)=>M[a].aicc-M[b].aicc);
+const BEST=RANK[0];
+
+/* forward model: post-2008 regime, log-linear with prediction interval */
+const iF=yr.indexOf(2010);
+const FWD=linfit(yr.slice(iF),D.slice(iF).map(Math.log));
+const fwdG=100*(Math.exp(FWD.b)-1);
+const fwd=y=>Math.exp(FWD.a+FWD.b*y);
+const fwdLo=y=>Math.exp(FWD.a+FWD.b*y-1.96*FWD.se(y));
+const fwdHi=y=>Math.exp(FWD.a+FWD.b*y+1.96*FWD.se(y));
+/* alternates */
+const i90=yr.indexOf(1990), F90=linfit(yr.slice(i90),D.slice(i90).map(Math.log));
+const f90=y=>Math.exp(F90.a+F90.b*y);
+const i13=yr.indexOf(2013), FLIN=linfit(yr.slice(i13),D.slice(i13));
+const flin=y=>FLIN.a+FLIN.b*y;
+/* GDP trend for the ratio projection */
+const GF=linfit(yr.slice(i90),G.slice(i90).map(Math.log));
+const gdp=y=>Math.exp(GF.a+GF.b*y);
+const gdpG=100*(Math.exp(GF.b)-1);
+
+/* ============================ FORMAT ============================ */
+const $=id=>document.getElementById(id);
+const fT=v=>'$'+(v>=100?v.toFixed(0):v>=10?v.toFixed(1):v.toFixed(2))+'T';
+const fPct=v=>v.toFixed(1)+'%';
+const CSS=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ============================ CHART ENGINE ============================ */
+function chart(host, cfg){
+  const el=typeof host==='string'?$(host):host;
+  const tip=document.createElement('div'); tip.className='tip'; el.appendChild(tip);
+  let hidden=new Set(cfg.hidden||[]);
+
+  function draw(){
+    const W=Math.max(el.clientWidth,280), H=cfg.height||360;
+    const m={l:cfg.ml??58,r:cfg.mr??20,t:14,b:36};
+    const [x0,x1]=cfg.xDomain, iw=W-m.l-m.r, ih=H-m.t-m.b;
+    const vis=cfg.series.filter(s=>!hidden.has(s.name));
+    let [y0,y1]=cfg.yDomain;
+    const X=x=>m.l+(x-x0)/(x1-x0)*iw;
+    const Y=cfg.yLog
+      ? y=>m.t+(Math.log(y1)-Math.log(Math.max(y,y0*0.5)))/(Math.log(y1)-Math.log(y0))*ih
+      : y=>m.t+(y1-y)/(y1-y0)*ih;
+    const p=[];
+    p.push('<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+(cfg.aria||'chart')+'">');
+
+    /* projection wash */
+    if(cfg.projFrom!=null && cfg.projFrom<x1){
+      p.push('<rect x="'+X(cfg.projFrom)+'" y="'+m.t+'" width="'+(X(x1)-X(cfg.projFrom))+'" height="'+ih+'" fill="'+CSS('--surface-2')+'" opacity=".62"/>');
+      p.push('<text x="'+(X(cfg.projFrom)+7)+'" y="'+(m.t+13)+'" font-size="10.5" font-family="IBM Plex Mono, monospace" letter-spacing=".08em" fill="'+CSS('--ink-3')+'">PROJECTED</text>');
+    }
+    /* custom zones (regime shading) */
+    (cfg.zones||[]).forEach(z=>{
+      p.push('<rect x="'+X(z.from)+'" y="'+m.t+'" width="'+(X(z.to)-X(z.from))+'" height="'+ih+'" fill="'+CSS('--surface-2')+'" opacity=".7"/>');
+      if(z.label) p.push('<text x="'+((X(z.from)+X(z.to))/2)+'" y="'+(m.t+14)+'" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="'+CSS('--ink-3')+'">'+z.label+'</text>');
+    });
+
+    /* y grid */
+    cfg.yTicks.forEach(v=>{
+      if(v<y0||v>y1) return;
+      const y=Y(v);
+      p.push('<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+y+'" y2="'+y+'" stroke="'+CSS('--rule')+'" stroke-width="1"'+(v===0?' stroke-dasharray="0"':'')+'/>');
+      p.push('<text x="'+(m.l-9)+'" y="'+(y+3.5)+'" text-anchor="end" font-size="11" font-family="IBM Plex Mono, monospace" fill="'+CSS('--ink-3')+'">'+cfg.yFmt(v)+'</text>');
+    });
+    /* x ticks */
+    cfg.xTicks.forEach(v=>{
+      const x=X(v);
+      p.push('<line x1="'+x+'" x2="'+x+'" y1="'+(m.t+ih)+'" y2="'+(m.t+ih+5)+'" stroke="'+CSS('--rule-2')+'"/>');
+      p.push('<text x="'+x+'" y="'+(m.t+ih+20)+'" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" fill="'+CSS('--ink-3')+'">'+v+'</text>');
+    });
+    p.push('<line x1="'+m.l+'" x2="'+(W-m.r)+'" y1="'+(m.t+ih)+'" y2="'+(m.t+ih)+'" stroke="'+CSS('--rule-2')+'" stroke-width="1"/>');
+
+    /* bands */
+    (cfg.bands||[]).forEach(b=>{
+      if(hidden.has(b.owner)) return;
+      const up=b.pts.map(q=>X(q[0])+','+Y(q[2])).join(' L ');
+      const dn=b.pts.slice().reverse().map(q=>X(q[0])+','+Y(q[1])).join(' L ');
+      p.push('<path d="M '+up+' L '+dn+' Z" fill="'+CSS('--band')+'"/>');
+    });
+
+    /* series */
+    vis.forEach(s=>{
+      const col=CSS(s.color);
+      const segs=[[]];
+      const lo=cfg.clipLo ?? (cfg.yLog?y0:-1e18), hi=cfg.clipHi ?? (cfg.yLog?y1:1e18);
+      s.pts.forEach(q=>{
+        if(q[1]==null||!isFinite(q[1])||(cfg.yLog&&q[1]<=0)){segs.push([]);return;}
+        segs[segs.length-1].push([q[0],Math.min(Math.max(q[1],lo),hi)]);
+      });
+      segs.filter(g=>g.length>1).forEach(g=>{
+        const solid=g.filter(q=>q[0]<=(s.solidTo??x1));
+        const dashd=g.filter(q=>q[0]>=(s.solidTo??x1));
+        const path=a=>'M '+a.map(q=>X(q[0])+','+Y(q[1])).join(' L ');
+        if(solid.length>1) p.push('<path d="'+path(solid)+'" fill="none" stroke="'+col+'" stroke-width="'+(s.w||2)+'" stroke-linejoin="round" stroke-linecap="round"'+(s.dash?' stroke-dasharray="'+s.dash+'"':'')+'/>');
+        if(dashd.length>1) p.push('<path d="'+path(dashd)+'" fill="none" stroke="'+col+'" stroke-width="'+(s.w||2)+'" stroke-dasharray="5 4" stroke-linecap="round"/>');
+      });
+      if(s.dots) s.pts.forEach(q=>{
+        if(q[1]==null||!isFinite(q[1])) return;
+        p.push('<circle cx="'+X(q[0])+'" cy="'+Y(q[1])+'" r="'+(s.r||2.6)+'" fill="'+col+'" stroke="'+CSS('--surface')+'" stroke-width="1.6"/>');
+      });
+      if(s.endLabel){
+        const last=s.pts.filter(q=>q[1]!=null&&isFinite(q[1])).pop();
+        if(last) p.push('<text x="'+(X(last[0])+7)+'" y="'+(Y(last[1])+4)+'" font-size="11.5" font-weight="600" font-family="IBM Plex Mono, monospace" fill="'+col+'">'+s.endLabel+'</text>');
+      }
+    });
+    /* reference rules */
+    (cfg.rules||[]).forEach(r=>{
+      p.push('<line x1="'+X(r.from??x0)+'" x2="'+X(r.to??x1)+'" y1="'+Y(r.y)+'" y2="'+Y(r.y)+'" stroke="'+CSS(r.color||'--ink-3')+'" stroke-width="1.5" stroke-dasharray="3 3"/>');
+      if(r.label) p.push('<text x="'+(X(r.from??x0)+6)+'" y="'+(Y(r.y)-6)+'" font-size="11" font-family="IBM Plex Mono, monospace" fill="'+CSS(r.color||'--ink-3')+'">'+r.label+'</text>');
+    });
+    p.push('<line id="cross" x1="0" x2="0" y1="'+m.t+'" y2="'+(m.t+ih)+'" stroke="'+CSS('--ink-3')+'" stroke-width="1" opacity="0"/>');
+    p.push('<rect class="hit" x="'+m.l+'" y="'+m.t+'" width="'+iw+'" height="'+ih+'" fill="transparent"/>');
+    p.push('</svg>');
+
+    const holder=el.querySelector('.plot')||(()=>{const d=document.createElement('div');d.className='plot';el.insertBefore(d,tip);return d;})();
+    holder.innerHTML=p.join('');
+
+    /* hover */
+    const svg=holder.querySelector('svg'), cross=holder.querySelector('#cross');
+    const hit=holder.querySelector('.hit');
+    const toSvg=e=>{const r=svg.getBoundingClientRect();return (e.clientX-r.left)*(W/r.width);};
+    const move=e=>{
+      const px=toSvg(e);
+      let x=Math.round(x0+(px-m.l)/iw*(x1-x0));
+      x=Math.min(Math.max(x,x0),x1);
+      cross.setAttribute('x1',X(x)); cross.setAttribute('x2',X(x)); cross.setAttribute('opacity','.45');
+      let html='<div class="ty">'+(cfg.xLabel?cfg.xLabel+' ':'')+x+'</div>';
+      vis.forEach(s=>{
+        const hitp=s.pts.find(q=>q[0]===x);
+        if(!hitp||hitp[1]==null||!isFinite(hitp[1])) return;
+        html+='<div class="tr"><span class="nm"><span class="swatch" style="background:'+CSS(s.color)+'"></span>'+s.name+'</span><span class="vl">'+cfg.yFmt(hitp[1],true)+'</span></div>';
+      });
+      tip.innerHTML=html; tip.style.opacity='1';
+      const r=svg.getBoundingClientRect(), scale=r.width/W;
+      let left=X(x)*scale+14;
+      if(left+tip.offsetWidth>r.width-4) left=X(x)*scale-tip.offsetWidth-14;
+      tip.style.left=Math.max(4,left)+'px';
+      tip.style.top=(m.t*scale+8)+'px';
+    };
+    hit.addEventListener('pointermove',move);
+    hit.addEventListener('pointerleave',()=>{tip.style.opacity='0';cross.setAttribute('opacity','0');});
+  }
+
+  /* legend */
+  if(cfg.legend){
+    const L=$(cfg.legend); L.innerHTML='';
+    cfg.series.forEach(s=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.setAttribute('aria-pressed', hidden.has(s.name)?'false':'true');
+      b.innerHTML='<span class="swatch'+(s.dots&&!s.w?' dot':'')+'" style="background:'+CSS(s.color)+'"></span>'+s.name+(s.note?' <span class="pill">'+s.note+'</span>':'');
+      b.onclick=()=>{
+        if(hidden.has(s.name)) hidden.delete(s.name); else hidden.add(s.name);
+        b.setAttribute('aria-pressed', hidden.has(s.name)?'false':'true');
+        draw();
+      };
+      L.appendChild(b);
+    });
+  }
+  draw();
+  let tmr; new ResizeObserver(()=>{clearTimeout(tmr);tmr=setTimeout(draw,60);}).observe(el);
+  const api={redraw:draw};
+  (window.__charts||(window.__charts=[])).push(api);
+  return api;
+}
+
+/* ============================ TILES ============================ */
+const T2=Math.LN2/FWD.b;
+$('tiles').innerHTML=[
+  ['Debt, FY2025', fT(D[N-1]), 'gross federal debt outstanding'],
+  ['Best-fit law', 'Exponential', 'piecewise in three regimes'],
+  ['Growth, 2010–2025', fwdG.toFixed(2)+'%/yr', 'doubling every '+T2.toFixed(1)+' years'],
+  ['Central 2030 path', fT(fwd(2030)), '95% interval '+fT(fwdLo(2030))+' – '+fT(fwdHi(2030))]
+].map(([k,v,n])=>'<div class="tile"><span class="k">'+k+'</span><span class="v">'+v+'</span><span class="n">'+n+'</span></div>').join('');
+
+const pw=M['Exponential, 2 breaks'], ex=M['Exponential'];
+$('mainFormula').innerHTML='D(t) = D₀ · exp( <span class="hl">r</span>·t ),&nbsp;&nbsp; <span class="hl">r</span> = '+pw.rates[0].toFixed(1)+'%/yr before '+pw.breaks[0]+' · '+pw.rates[1].toFixed(1)+'%/yr '+pw.breaks[0]+'–'+pw.breaks[1]+' · '+pw.rates[2].toFixed(1)+'%/yr after '+pw.breaks[1];
+$('fullExpG').textContent=ex.g.toFixed(2)+'%';
+$('fullExpT2').textContent=(Math.LN2/ex.r).toFixed(1)+' years';
+$('modernG').textContent=fwdG.toFixed(2)+'%';
+$('modernT2').textContent=T2.toFixed(1)+' years';
+$('pw2Oos').textContent=fT(M['Exponential, 2 breaks'].oos2025);
+
+/* ============================ TABLES ============================ */
+(function(){
+  const rows=RANK.map(nm=>{const m=M[nm];
+    const good=m.oos<12?' good':m.oos>40?' bad':'';
+    return '<tr'+(nm===BEST?' class="best"':'')+'>'
+      +'<td>'+nm+'<br><span class="mono" style="font-size:.76rem;color:var(--ink-3)">'+m.form+'</span></td>'
+      +'<td class="num" style="text-align:left;white-space:normal;font-size:.8rem;color:var(--ink-2)">'+m.desc+'</td>'
+      +'<td class="num">'+m.k+'</td>'
+      +'<td class="num">'+(m.r2log>0?m.r2log.toFixed(4):'—')+'</td>'
+      +'<td class="num">'+m.mape.toFixed(1)+'%</td>'
+      +'<td class="num">'+m.aicc.toFixed(0)+'</td>'
+      +'<td class="num"><span class="pill'+good+'">'+m.oos.toFixed(1)+'%</span></td>'
+      +'<td class="num">'+fT(m.proj(2030))+'</td></tr>';}).join('');
+  $('modelTable').innerHTML='<thead><tr><th>Model</th><th style="text-align:left">Fitted parameters</th><th>k</th><th>R² (log)</th><th>MAPE</th><th>AICc</th><th>Out-of-sample MAPE</th><th>2030</th></tr></thead><tbody>'+rows+'</tbody>';
+})();
+
+(function(){
+  const yrsP=[2026,2027,2028,2029,2030];
+  const paths=[
+    ['Post-2008 exponential ('+fwdG.toFixed(2)+'%/yr) — central', y=>fwd(y)],
+    ['  95% interval', y=>null, y=>fT(fwdLo(y))+' – '+fT(fwdHi(y))],
+    ['Since-1990 exponential ('+(100*(Math.exp(F90.b)-1)).toFixed(2)+'%/yr)', y=>f90(y)],
+    ['Full-sample exponential ('+ex.g.toFixed(2)+'%/yr)', y=>ex.proj(y)],
+    ['3-regime piecewise exponential', y=>pw.proj(y)],
+    ['Linear on 2013–2025 ($'+FLIN.b.toFixed(2)+'T/yr)', y=>flin(y)],
+    ['Debt ÷ GDP at trend', y=>null, y=>(100*fwd(y)/gdp(y)).toFixed(0)+'% of GDP']
+  ];
+  const head='<thead><tr><th>Projection path</th>'+yrsP.map(y=>'<th>FY'+y+'</th>').join('')+'</tr></thead>';
+  const body=paths.map(([nm,f,g])=>'<tr><td>'+nm+'</td>'+yrsP.map(y=>'<td class="num">'+(g?g(y):fT(f(y)))+'</td>').join('')+'</tr>').join('');
+  $('projTable').innerHTML=head+'<tbody>'+body+'</tbody>';
+})();
+
+(function(){
+  const head='<thead><tr><th>FY</th><th>Debt ($T)</th><th>GDP ($T)</th><th>Debt/GDP</th><th>Δ debt ($T)</th><th>Growth</th></tr></thead>';
+  const body=yr.map((y,i)=>'<tr><td class="num">'+y+'</td><td class="num">'+D[i].toFixed(3)+'</td><td class="num">'+G[i].toFixed(3)+'</td><td class="num">'+(100*D[i]/G[i]).toFixed(1)+'%</td><td class="num">'+(i?(D[i]-D[i-1]).toFixed(3):'—')+'</td><td class="num">'+(i?(100*(D[i]/D[i-1]-1)).toFixed(1)+'%':'—')+'</td></tr>').join('');
+  $('dataTable').innerHTML=head+'<tbody>'+body+'</tbody>';
+})();
+
+/* ============================ CHARTS ============================ */
+const YRS=[]; for(let y=Y0;y<=END;y++) YRS.push(y);
+const actual=yr.map((y,i)=>[y,D[i]]);
+const curve=(f)=>YRS.map(y=>[y,f(y-Y0)]);
+
+/* 1 — log scale diagnostic */
+chart('c1',{
+  height:400, yLog:true, xDomain:[Y0,END], yDomain:[0.2,90],
+  yTicks:[0.3,1,3,10,30,90], xTicks:[1955,1965,1975,1985,1995,2005,2015,2025,2030],
+  yFmt:(v,q)=>'$'+(q?(v<1?v.toFixed(2):v.toFixed(1)):(v<1?v.toFixed(1):v.toFixed(0)))+'T',
+  xLabel:'FY', projFrom:LAST, legend:'c1leg',
+  aria:'Gross federal debt on a logarithmic scale with ten fitted models',
+  series:[
+    {name:'Actual debt', color:'--ink', pts:actual, dots:true, w:2.4, solidTo:LAST},
+    {name:'Exponential', color:'--s1', pts:curve(M['Exponential'].f), solidTo:LAST, note:'8.2%/yr'},
+    {name:'Exponential, 2 breaks', color:'--s2', pts:curve(pw.f), solidTo:LAST, note:'best AICc'},
+    {name:'Logistic', color:'--s3', pts:curve(M['Logistic'].f), solidTo:LAST},
+    {name:'Quadratic', color:'--s4', pts:curve(M['Quadratic'].f), solidTo:LAST, note:'level fit'},
+    {name:'Cubic', color:'--s7', pts:curve(M['Cubic'].f), solidTo:LAST, note:'level fit'},
+    {name:'Finite-time singularity', color:'--s8', pts:curve(M['Finite-time singularity'].f), solidTo:LAST}
+  ]
+});
+
+/* 3 — residuals */
+const resid=(f)=>yr.map((y,i)=>[y,100*(f(y-Y0)-D[i])/D[i]]);
+chart('c3',{
+  height:300, xDomain:[Y0,LAST], yDomain:[-100,100],
+  yTicks:[-100,-50,0,50,100], xTicks:[1955,1965,1975,1985,1995,2005,2015,2025],
+  yFmt:(v,q)=>(v>0?'+':'')+(q?v.toFixed(1):v)+'%', xLabel:'FY', legend:'c3leg', clipLo:-100, clipHi:100,
+  aria:'Percentage error of each model over time',
+  series:[
+    {name:'Exponential', color:'--s1', pts:resid(M['Exponential'].f)},
+    {name:'Exponential, 2 breaks', color:'--s2', pts:resid(pw.f)},
+    {name:'Logistic', color:'--s3', pts:resid(M['Logistic'].f)},
+    {name:'Quadratic', color:'--s4', pts:resid(M['Quadratic'].f)},
+    {name:'Cubic', color:'--s7', pts:resid(M['Cubic'].f)}
+  ],
+  rules:[{y:0,color:'--ink-3'}]
+});
+
+/* 4 — rolling 10y CAGR */
+const roll=[]; for(let i=10;i<N;i++) roll.push([yr[i],100*((D[i]/D[i-10])**0.1-1)]);
+chart('c4',{
+  height:300, xDomain:[1965,LAST], yDomain:[0,15],
+  yTicks:[0,3,6,9,12,15], xTicks:[1965,1975,1985,1995,2005,2015,2025],
+  yFmt:(v,q)=>(q?v.toFixed(2):v)+'%', xLabel:'10 yrs to FY',
+  aria:'Trailing ten-year compound growth rate of federal debt',
+  zones:[{from:1965,to:1972,label:''},{from:1990,to:LAST,label:''}],
+  series:[{name:'10-yr CAGR', color:'--accent', pts:roll, w:2.4, dots:true, r:2.2}],
+  rules:[
+    {y:pw.rates[1], color:'--s2', from:1972, to:1990, label:pw.rates[1].toFixed(1)+'% fitted regime'},
+    {y:pw.rates[2], color:'--s2', from:1990, to:LAST, label:pw.rates[2].toFixed(1)+'%'}
+  ]
+});
+
+/* 2 — projection */
+const projYrs=[]; for(let y=1990;y<=END;y++) projYrs.push(y);
+chart('c2',{
+  height:380, xDomain:[1990,END], yDomain:[0,62],
+  yTicks:[0,10,20,30,40,50,60], xTicks:[1990,1995,2000,2005,2010,2015,2020,2025,2030],
+  yFmt:(v,q)=>'$'+(q?v.toFixed(1):v)+'T', xLabel:'FY', projFrom:LAST, legend:'c2leg', mr:34,
+  aria:'Debt since 1990 with projections to 2030 and a 95 percent prediction interval',
+  bands:[{owner:'Post-2008 trend', pts:projYrs.filter(y=>y>=2010).map(y=>[y,fwdLo(y),fwdHi(y)])}],
+  series:[
+    {name:'Actual debt', color:'--ink', pts:projYrs.filter(y=>y<=LAST).map(y=>[y,D[yr.indexOf(y)]]), dots:true, w:2.4, solidTo:LAST},
+    {name:'Post-2008 trend', color:'--s1', pts:projYrs.filter(y=>y>=2010).map(y=>[y,fwd(y)]), solidTo:LAST, note:fwdG.toFixed(1)+'%/yr'},
+    {name:'3-regime piecewise', color:'--s2', pts:projYrs.map(y=>[y,pw.proj(y)]), solidTo:LAST},
+    {name:'Linear, last 12 yrs', color:'--s3', pts:projYrs.filter(y=>y>=2013).map(y=>[y,flin(y)]), solidTo:LAST, note:'$'+FLIN.b.toFixed(1)+'T/yr'}
+  ]
+});
+
+/* 5 — debt/GDP */
+const ratioHist=yr.map((y,i)=>[y,100*D[i]/G[i]]);
+const ratioProj=[]; for(let y=LAST;y<=END;y++) ratioProj.push([y,100*fwd(y)/gdp(y)]);
+chart('c5',{
+  height:320, xDomain:[Y0,END], yDomain:[0,160],
+  yTicks:[0,40,80,120,160], xTicks:[1955,1965,1975,1985,1995,2005,2015,2025,2030],
+  yFmt:(v,q)=>(q?v.toFixed(1):v)+'%', xLabel:'FY', projFrom:LAST, mr:46,
+  aria:'Gross federal debt as a percentage of GDP, 1955 to 2030',
+  series:[
+    {name:'Debt / GDP', color:'--accent', pts:ratioHist.concat(ratioProj.slice(1)), w:2.4, solidTo:LAST, endLabel:Math.round(100*fwd(2030)/gdp(2030))+'%'},
+  ],
+  rules:[{y:100,color:'--ink-3',label:'debt = one year of GDP'}]
+});
+
+/* charts read colors from CSS variables at draw time, so redraw whenever the theme changes */
+const repaint=()=>window.__charts.forEach(c=>c.redraw());
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',repaint);
+new MutationObserver(repaint).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>
